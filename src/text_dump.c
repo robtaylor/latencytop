@@ -34,24 +34,24 @@
 #include <wchar.h>
 #include <ctype.h>
 
-#include <glib.h>
+#include "dlist.h"
 
 #include "latencytop.h"
 
-static GList *cursor_e = NULL;
+static dlist_t *cursor_e = NULL;
 static int done = 0;
 
 static void print_global_list(void)
 {
-	GList *item;
+	dlist_t *item;
 	struct latency_line *line;
 	int i = 1;
 
 	printf("Globals: Cause Maximum Percentage\n");
-	item = g_list_first(lines);
+	item = dlist_first(lines);
 	while (item && i < 10) {
 		line = item->data;
-		item = g_list_next(item);
+		item = dlist_next(item);
 
 		if (line->max*0.001 < 0.1)
 			continue;
@@ -114,32 +114,32 @@ static void print_one_backtrace(char *trace)
 static void print_procs()
 {
 	struct process *proc;
-	GList *item;
+	dlist_t *item;
 	double total;
 
 	printf("Process details:\n");
-	item = g_list_first(procs);
+	item = dlist_first(procs);
 	while (item) {
 		int printit = 0;
-		GList *item2;
+		dlist_t *item2;
 		struct latency_line *line;
 		proc = item->data;
-		item = g_list_next(item);
+		item = dlist_next(item);
 
 		total = 0.0;
 
-		item2 = g_list_first(proc->latencies);
+		item2 = dlist_first(proc->latencies);
 		while (item2) {
 			line = item2->data;
-			item2 = g_list_next(item2);
+			item2 = dlist_next(item2);
 			total = total + line->time;
 		}
-		item2 = g_list_first(proc->latencies);
+		item2 = dlist_first(proc->latencies);
 		while (item2) {
 			char *p;
 			char *backtrace;
 			line = item2->data;
-			item2 = g_list_next(item2);
+			item2 = dlist_next(item2);
 			if (line->max*0.001 < 0.1)
 				continue;
 			if (!printit) {

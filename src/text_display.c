@@ -34,7 +34,7 @@
 #include <wchar.h>
 #include <ctype.h>
 
-#include <glib.h>
+#include "dlist.h"
 
 #include "latencytop.h"
 
@@ -43,7 +43,7 @@ static WINDOW *global_window;
 static WINDOW *process_window;
 static WINDOW *right_window;
 
-static GList *cursor_e = NULL;
+static dlist_t *cursor_e = NULL;
 
 
 static void cleanup_curses(void) 
@@ -107,16 +107,16 @@ static void show_title_bar(void)
 
 static void print_global_list(void)
 {
-	GList *item;
+	dlist_t *item;
 	struct latency_line *line;
 	int i = 1;
 
 	mvwprintw(global_window, 0, 0, "Cause");
 	mvwprintw(global_window, 0, 50, "   Maximum     Percentage\n");
-	item = g_list_first(lines);
+	item = dlist_first(lines);
 	while (item && i < 10) {
 		line = item->data;
-		item = g_list_next(item);
+		item = dlist_next(item);
 		
 		if (line->max*0.001 < 0.1) 
 			continue;
@@ -132,7 +132,7 @@ static void print_global_list(void)
 
 static void display_process_list(unsigned int cursor_pid, char filter)
 {
-	GList *entry, *start = NULL;
+	dlist_t *entry, *start = NULL;
 	struct process *proc;
 	int i = 0, xpos = 0;
 	char startswith;
@@ -144,7 +144,7 @@ retry:
 	xpos = 0;
 	start = cursor_e;	
 	if (!start) {
-		start = g_list_first(procs);
+		start = dlist_first(procs);
 		cursor_e = start;
 	}
 	
@@ -153,7 +153,7 @@ retry:
 		
 	proc = start->data;
 	while (proc->pid > cursor_pid && cursor_pid > 0) {
-		start = g_list_previous(start);
+		start = dlist_previous(start);
 		proc = start->data;
 		cursor_e = start;
 	}
@@ -165,13 +165,13 @@ retry:
 		startswith = proc->name[0];
 		startswith = toupper(startswith);
 		if ((filter != '\0') && (startswith != filter)) {
-			start = g_list_next(start);
+			start = dlist_next(start);
 			continue;
 		}
 
 		if (proc->pid == cursor_pid) {
 			if (xpos + strlen(proc->name) + 2 > maxx && cursor_e) {
-				cursor_e = g_list_next(cursor_e);
+				cursor_e = dlist_next(cursor_e);
 				goto retry;
 			}
 			wattron(process_window, A_REVERSE);
@@ -183,7 +183,7 @@ retry:
 		
 		wattroff(process_window, A_REVERSE);
 
-		start = g_list_next(start);
+		start = dlist_next(start);
 
 		i++;
 	}	
@@ -192,7 +192,7 @@ retry:
 
 static int one_pid_back(unsigned int cursor_pid, char filter)
 {
-	GList *entry, *start = NULL;
+	dlist_t *entry, *start = NULL;
 	struct process *proc;
 	char startswith;
 
@@ -203,11 +203,11 @@ static int one_pid_back(unsigned int cursor_pid, char filter)
 			start = entry;
 			break;
 		}	
-		entry = g_list_next(entry);
+		entry = dlist_next(entry);
 	}
 	while (start) {
-		if (g_list_previous(start))
-				start = g_list_previous(start);
+		if (dlist_previous(start))
+				start = dlist_previous(start);
 		if (start) {
 			proc=start->data;
 			startswith = proc->name[0];
@@ -215,7 +215,7 @@ static int one_pid_back(unsigned int cursor_pid, char filter)
 			if ((filter == '\0') || (startswith == filter))
 				return proc->pid;
 			else
-				start = g_list_previous(start);
+				start = dlist_previous(start);
 		}
 	}
 	return 0;
@@ -223,7 +223,7 @@ static int one_pid_back(unsigned int cursor_pid, char filter)
 
 static int one_pid_forward(unsigned int cursor_pid, char filter)
 {
-	GList *entry, *start = NULL;
+	dlist_t *entry, *start = NULL;
 	struct process *proc;
 	char startswith;
 
@@ -234,11 +234,11 @@ static int one_pid_forward(unsigned int cursor_pid, char filter)
 			start = entry;
 			break;
 		}	
-		entry = g_list_next(entry);
+		entry = dlist_next(entry);
 	}
 	while (start) {
-		if (g_list_next(start))
-				start = g_list_next(start);
+		if (dlist_next(start))
+				start = dlist_next(start);
 		if (start) {
 			proc=start->data;
 			startswith = proc->name[0];
@@ -246,7 +246,7 @@ static int one_pid_forward(unsigned int cursor_pid, char filter)
 			if ((filter == '\0') || (startswith == filter))
 				return proc->pid;
 			else
-				start = g_list_next(start);
+				start = dlist_next(start);
 		}
 	}
 	return 0;
@@ -255,18 +255,18 @@ static int one_pid_forward(unsigned int cursor_pid, char filter)
 static void print_process(unsigned int pid)
 {
 	struct process *proc;
-	GList *item;
+	dlist_t *item;
 	werase(right_window);
 	double total = 0.0;
 
-	item = g_list_first(procs);
+	item = dlist_first(procs);
 	while (item) {
 		char header[4096];
 		int i = 0;
-		GList *item2;
+		dlist_t *item2;
 		struct latency_line *line;
 		proc = item->data;
-		item = g_list_next(item);
+		item = dlist_next(item);
 		if (proc->pid != pid)
 			continue;
 		wattron(right_window, A_REVERSE);
@@ -275,18 +275,18 @@ static void print_process(unsigned int pid)
 			strcat(header, " ");
 		mvwprintw(right_window, 0, 0, "%s", header);
 		
-		item2 = g_list_first(proc->latencies);
+		item2 = dlist_first(proc->latencies);
 		while (item2 && i < 6) {
 			line = item2->data;
-			item2 = g_list_next(item2);
+			item2 = dlist_next(item2);
 			total = total + line->time;
 		}
 		mvwprintw(right_window, 0, 43, "Total: %5.1f msec", total*0.001);
 		wattroff(right_window, A_REVERSE);
-		item2 = g_list_first(proc->latencies);
+		item2 = dlist_first(proc->latencies);
 		while (item2 && i < 6) {
 			line = item2->data;
-			item2 = g_list_next(item2);
+			item2 = dlist_next(item2);
 			if (line->max*0.001 < 0.1)
 				continue;
 			mvwprintw(right_window, i+1, 0, "%s", line->reason);

@@ -15,7 +15,7 @@ struct process {
 	int kernelthread;
 	char name[64];
 	unsigned int max;
-	GList *latencies;
+	dlist_t *latencies;
 	int used;
 	int exists;
 	int pinned;
@@ -25,9 +25,9 @@ struct process {
         int delaycount;
 };
 
-extern GList *lines;
-extern GList *procs;
-extern GList *translations;
+extern dlist_t *lines;
+extern dlist_t *procs;
+extern dlist_t *translations;
 extern int total_time;
 extern int total_count;
 
