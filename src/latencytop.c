@@ -560,12 +560,15 @@ int main(int argc, char **argv)
 			console_dump = 1;
 	}
 
-#ifdef HAS_GTK_GUI
+#if defined(HAS_GTK_GUI)
 	if (!console_dump && preinitialize_gtk_ui(&argc, &argv))
 		use_gtk = 1;
-#endif
+#elif defined(HAS_NCURSES)
 	if (!console_dump && !use_gtk)
 		preinitialize_text_ui(&argc, &argv);
+#else
+	console_dump = 1;
+#endif
 
 	for (i = 1; i < argc; i++)
 		if (strcmp(argv[i], "--unknown") == 0) {
@@ -579,7 +582,7 @@ int main(int argc, char **argv)
 			prefered_process = strdup(argv[i]);
 			break;
 		}
-
+		
 	init_translations("/usr/share/latencytop/latencytop.trans");
 	if (!translations)
 		init_translations("latencytop.trans"); /* for those who don't do make install */
@@ -597,7 +600,9 @@ int main(int argc, char **argv)
 			start_gtk_ui();
 		else
 #endif
+#ifdef HAS_NCURSES
 			start_text_ui();
+#endif
 	}
 
 	prune_unused_procs();
