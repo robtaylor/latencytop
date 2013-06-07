@@ -1,6 +1,8 @@
 #ifndef __dlist_h__
 #define __dlist_h__
 
+#include <stdbool.h>
+
 typedef struct dlist_s dlist_t;
 
 struct dlist_s

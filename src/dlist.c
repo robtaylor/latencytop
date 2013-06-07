@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "dlist.h"
 
 
 
@@ -69,7 +70,7 @@ dlist_t* dlist_sort(dlist_t* list, int (*compare)(void*, void*))
             dlist_t* b = i->next;
 
             int c = compare(a->data, b->data);
-            if (i > 0)
+            if (c > 0)
             {
                 a->next = b->next;
                 b->prev = a->prev;

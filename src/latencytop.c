@@ -30,6 +30,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <limits.h>
 
 #include "dlist.h"
 
@@ -167,7 +168,7 @@ void parse_global_list(void)
 	fclose(file);
 }
 
-gint comparef(gconstpointer A, gconstpointer B)
+int comparef(void* A, void* B)
 {
 	struct latency_line *a, *b;
 	a = (struct latency_line *)A; 

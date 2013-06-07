@@ -4,10 +4,10 @@
 
 DESTDIR =
 SBINDIR = /usr/sbin
-XCFLAGS = -W  -g `pkg-config --cflags glib-2.0` -D_FORTIFY_SOURCE=2 -Wno-sign-compare
-LDF = -Wl,--as-needed `pkg-config --libs glib-2.0`   
+XCFLAGS = -W  -g -D_FORTIFY_SOURCE=2 -Wno-sign-compare
+LDF = -Wl,--as-needed  
 
-OBJS= latencytop.o text_dump.o translate.o
+OBJS= latencytop.o text_dump.o translate.o dlist.o
 
 ifdef HAS_GTK_GUI
   XCFLAGS += `pkg-config --cflags gtk+-2.0` -DHAS_GTK_GUI

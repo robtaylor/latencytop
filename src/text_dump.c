@@ -33,6 +33,7 @@
 #include <time.h>
 #include <wchar.h>
 #include <ctype.h>
+#include <signal.h>
 
 #include "dlist.h"
 
