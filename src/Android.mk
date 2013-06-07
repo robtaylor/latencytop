@@ -14,6 +14,7 @@ LOCAL_SHARED_LIBRARIES:= \
 	libglib-2.0
 
 LOCAL_C_INCLUDES:= \
+	-ggdb3 -00 \
 	$(latencytop_real_TOP)/src \
 	external/glib         \
 	external/glib/glib    \
